@@ -1,5 +1,5 @@
 const tf = require('@tensorflow/tfjs-node');
 async function loadModel() {
-    return tf.loadGraphModel('https://storage.googleapis.com/submission-ml-bucket/ml-in-prod/model.json');// isi sesuai bucket model jika tidak menggunakan env
+    return tf.loadGraphModel(process.env.MODEL_URL);
 }
 module.exports = loadModel;
