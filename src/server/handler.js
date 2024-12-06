@@ -1,6 +1,7 @@
 const predictClassification = require("../services/inferenceService");
 const crypto = require("crypto");
 const storeData = require("../services/storeData");
+const { Firestore } = require("@google-cloud/firestore");
 
 async function postPredictHandler(request, h) {
   try {
@@ -29,7 +30,7 @@ async function postPredictHandler(request, h) {
     await storeData(id, data);
 
     const message = "Model is predicted successfully";
-    console.log("Message:", message);  // Log message untuk debugging
+    // console.log("Message:", message);  // Log message untuk debugging
 
     // Build and return the response
     return h.response({
