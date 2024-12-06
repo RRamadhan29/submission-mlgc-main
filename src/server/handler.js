@@ -7,7 +7,7 @@ async function postPredictHandler(request, h) {
     const { image } = request.payload;
     const { model } = request.server.app;
 
-    // Perform inference
+    // Call the inference service
     const { confidenceScore, label, suggestion } = await predictClassification(
       model,
       image
@@ -25,19 +25,17 @@ async function postPredictHandler(request, h) {
       createdAt,
     };
 
-    // Store data in database
+    // Store data in Firestore
     await storeData(id, data);
 
     const message = "Model is predicted successfully";
 
-    // Build response
-    const response = h.response({
+    // Build and return the response
+    return h.response({
       status: "success",
       message,
       data,
-    });
-    response.code(201);
-    return response;
+    }).code(201);
   } catch (error) {
     console.error(error);
     return h.response({
@@ -47,39 +45,4 @@ async function postPredictHandler(request, h) {
   }
 }
 
-async function predictHistories(request, h) {
-  try {
-    const { Firestore } = require("@google-cloud/firestore");
-    const db = new Firestore({ projectId: "submissionmlgc-ramadhan-443814" });
-
-    // Fetch prediction histories from Firestore
-    const predictCollection = db.collection("predictions");
-    const snapshot = await predictCollection.get();
-
-    const result = [];
-    snapshot.forEach((doc) => {
-      result.push({
-        id: doc.id,
-        history: {
-          id: doc.data().id,
-          result: doc.data().result,
-          suggestion: doc.data().suggestion,
-          createdAt: doc.data().createdAt,
-        },
-      });
-    });
-
-    // Build response
-    return h.response({
-      status: "success",
-      data: result,
-    });
-  } catch (error) {
-    console.error(error);
-    return h.response({
-      status: "error",
-      message: "Gagal mengambil riwayat prediksi.",
-    }).code(500);
-  }
-}
-module.exports = { postPredictHandler, predictHistories };
+module.exports = { postPredictHandler };
