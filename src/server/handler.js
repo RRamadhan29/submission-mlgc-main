@@ -29,6 +29,7 @@ async function postPredictHandler(request, h) {
     await storeData(id, data);
 
     const message = "Model is predicted successfully";
+    console.log("Message:", message);  // Log message untuk debugging
 
     // Build and return the response
     return h.response({
@@ -45,4 +46,38 @@ async function postPredictHandler(request, h) {
   }
 }
 
-module.exports = { postPredictHandler };
+async function predictHistories(request, h) {
+  try {
+    const db = new Firestore({ projectId: "submissionmlgc-ramadhan-443814" });
+
+    // Fetch prediction histories from Firestore
+    const predictCollection = db.collection("predictions");
+    const snapshot = await predictCollection.get();
+
+    const result = [];
+    snapshot.forEach((doc) => {
+      result.push({
+        id: doc.id,
+        history: {
+          id: doc.data().id,
+          result: doc.data().result,
+          suggestion: doc.data().suggestion,
+          createdAt: doc.data().createdAt,
+        },
+      });
+    });
+
+    return h.response({
+      status: "success",
+      data: result,
+    });
+  } catch (error) {
+    console.error(error);
+    return h.response({
+      status: "error",
+      message: "Gagal mengambil riwayat prediksi.",
+    }).code(500);
+  }
+}
+
+module.exports = { postPredictHandler, predictHistories };
